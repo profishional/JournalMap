@@ -13,9 +13,14 @@ struct PersistenceController {
     static var preview: PersistenceController = {
         let result = PersistenceController(inMemory: true)
         let viewContext = result.container.viewContext
-        for _ in 0..<10 {
-            let newItem = Item(context: viewContext)
-            newItem.timestamp = Date()
+        for i in 0..<10 {
+            let newEntry = JournalEntry(context: viewContext)
+            newEntry.id = UUID()
+            newEntry.title = "Sample Entry \(i)"
+            newEntry.body = "This is a sample journal entry body text."
+            newEntry.timestamp = Date()
+            newEntry.lastModified = Date()
+            newEntry.position = Int32(i)
         }
         do {
             try viewContext.save()
@@ -34,6 +39,16 @@ struct PersistenceController {
         container = NSPersistentContainer(name: "JournalMap")
         if inMemory {
             container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")
+        } else {
+            // Enable CloudKit sync
+            let storeDescription = container.persistentStoreDescriptions.first
+            storeDescription?.setOption(true as NSNumber, forKey: NSPersistentHistoryTrackingKey)
+            storeDescription?.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
+            // CloudKit container identifier should match your app's bundle identifier
+            // Update this to match your actual bundle identifier (e.g., "iCloud.com.yourcompany.JournalMap")
+            if let identifier = Bundle.main.bundleIdentifier {
+                storeDescription?.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(containerIdentifier: "iCloud.\(identifier)")
+            }
         }
         container.loadPersistentStores(completionHandler: { (storeDescription, error) in
             if let error = error as NSError? {
