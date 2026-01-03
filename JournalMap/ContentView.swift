@@ -12,17 +12,7 @@ struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
 
     var body: some View {
-        TabView {
-            JournalEntriesPage(viewContext: viewContext)
-                .tag(0)
-
-            CollectionsPage(viewContext: viewContext)
-                .tag(1)
-
-            ChatbotPage(viewContext: viewContext)
-                .tag(2)
-        }
-        .tabViewStyle(.page(indexDisplayMode: .never))
+        JournalEntriesPage(viewContext: viewContext)
     }
 }
 

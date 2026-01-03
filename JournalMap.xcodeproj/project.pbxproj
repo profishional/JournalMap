@@ -16,6 +16,17 @@
 		A3DFFA222F07F2D9002287C4 /* JournalMapTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3DFFA212F07F2D9002287C4 /* JournalMapTests.swift */; };
 		A3DFFA2C2F07F2D9002287C4 /* JournalMapUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3DFFA2B2F07F2D9002287C4 /* JournalMapUITests.swift */; };
 		A3DFFA2E2F07F2D9002287C4 /* JournalMapUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3DFFA2D2F07F2D9002287C4 /* JournalMapUITestsLaunchTests.swift */; };
+		A3F6F61B2F08017B007A426E /* CategoryAutocompleteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3F6F60A2F08017B007A426E /* CategoryAutocompleteView.swift */; };
+		A3F6F61C2F08017B007A426E /* ChatbotPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3F6F60B2F08017B007A426E /* ChatbotPage.swift */; };
+		A3F6F61D2F08017B007A426E /* CollectionsPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3F6F60C2F08017B007A426E /* CollectionsPage.swift */; };
+		A3F6F61F2F08017B007A426E /* JournalEntriesPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3F6F60E2F08017B007A426E /* JournalEntriesPage.swift */; };
+		A3F6F6202F08017B007A426E /* AppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3F6F6102F08017B007A426E /* AppConfig.swift */; };
+		A3F6F6212F08017B007A426E /* OpenAIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3F6F6122F08017B007A426E /* OpenAIService.swift */; };
+		A3F6F6222F08017B007A426E /* ChatbotViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3F6F6142F08017B007A426E /* ChatbotViewModel.swift */; };
+		A3F6F6232F08017B007A426E /* CollectionsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3F6F6152F08017B007A426E /* CollectionsViewModel.swift */; };
+		A3F6F6242F08017B007A426E /* JournalViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3F6F6162F08017B007A426E /* JournalViewModel.swift */; };
+		A3F6F6252F08017B007A426E /* ChatMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3F6F6182F08017B007A426E /* ChatMessage.swift */; };
+		A3F6F6262F08017B007A426E /* TextStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3F6F6192F08017B007A426E /* TextStyle.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -48,6 +59,18 @@
 		A3DFFA272F07F2D9002287C4 /* JournalMapUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JournalMapUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A3DFFA2B2F07F2D9002287C4 /* JournalMapUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalMapUITests.swift; sourceTree = "<group>"; };
 		A3DFFA2D2F07F2D9002287C4 /* JournalMapUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalMapUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		A3F6F60A2F08017B007A426E /* CategoryAutocompleteView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CategoryAutocompleteView.swift; sourceTree = "<group>"; };
+		A3F6F60B2F08017B007A426E /* ChatbotPage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatbotPage.swift; sourceTree = "<group>"; };
+		A3F6F60C2F08017B007A426E /* CollectionsPage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CollectionsPage.swift; sourceTree = "<group>"; };
+		A3F6F60E2F08017B007A426E /* JournalEntriesPage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JournalEntriesPage.swift; sourceTree = "<group>"; };
+		A3F6F6102F08017B007A426E /* AppConfig.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppConfig.swift; sourceTree = "<group>"; };
+		A3F6F6122F08017B007A426E /* OpenAIService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OpenAIService.swift; sourceTree = "<group>"; };
+		A3F6F6142F08017B007A426E /* ChatbotViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatbotViewModel.swift; sourceTree = "<group>"; };
+		A3F6F6152F08017B007A426E /* CollectionsViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CollectionsViewModel.swift; sourceTree = "<group>"; };
+		A3F6F6162F08017B007A426E /* JournalViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JournalViewModel.swift; sourceTree = "<group>"; };
+		A3F6F6182F08017B007A426E /* ChatMessage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
+		A3F6F6192F08017B007A426E /* TextStyle.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextStyle.swift; sourceTree = "<group>"; };
+		A3F6F6272F0803D3007A426E /* JournalMap.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; name = JournalMap.entitlements; path = JournalMap/JournalMap.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -78,6 +101,12 @@
 		A3DFF9FF2F07F2D7002287C4 = {
 			isa = PBXGroup;
 			children = (
+				A3F6F6272F0803D3007A426E /* JournalMap.entitlements */,
+				A3F6F6112F08017B007A426E /* Config */,
+				A3F6F61A2F08017B007A426E /* Models */,
+				A3F6F6132F08017B007A426E /* Services */,
+				A3F6F6172F08017B007A426E /* ViewModels */,
+				A3F6F60F2F08017B007A426E /* Views */,
 				A3DFFA0A2F07F2D7002287C4 /* JournalMap */,
 				A3DFFA202F07F2D9002287C4 /* JournalMapTests */,
 				A3DFFA2A2F07F2D9002287C4 /* JournalMapUITests */,
@@ -131,6 +160,57 @@
 				A3DFFA2D2F07F2D9002287C4 /* JournalMapUITestsLaunchTests.swift */,
 			);
 			path = JournalMapUITests;
+			sourceTree = "<group>";
+		};
+		A3F6F60F2F08017B007A426E /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				A3F6F60A2F08017B007A426E /* CategoryAutocompleteView.swift */,
+				A3F6F60B2F08017B007A426E /* ChatbotPage.swift */,
+				A3F6F60C2F08017B007A426E /* CollectionsPage.swift */,
+				A3F6F60E2F08017B007A426E /* JournalEntriesPage.swift */,
+			);
+			name = Views;
+			path = JournalMap/Views;
+			sourceTree = "<group>";
+		};
+		A3F6F6112F08017B007A426E /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				A3F6F6102F08017B007A426E /* AppConfig.swift */,
+			);
+			name = Config;
+			path = JournalMap/Config;
+			sourceTree = "<group>";
+		};
+		A3F6F6132F08017B007A426E /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				A3F6F6122F08017B007A426E /* OpenAIService.swift */,
+			);
+			name = Services;
+			path = JournalMap/Services;
+			sourceTree = "<group>";
+		};
+		A3F6F6172F08017B007A426E /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				A3F6F6142F08017B007A426E /* ChatbotViewModel.swift */,
+				A3F6F6152F08017B007A426E /* CollectionsViewModel.swift */,
+				A3F6F6162F08017B007A426E /* JournalViewModel.swift */,
+			);
+			name = ViewModels;
+			path = JournalMap/ViewModels;
+			sourceTree = "<group>";
+		};
+		A3F6F61A2F08017B007A426E /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				A3F6F6182F08017B007A426E /* ChatMessage.swift */,
+				A3F6F6192F08017B007A426E /* TextStyle.swift */,
+			);
+			name = Models;
+			path = JournalMap/Models;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -263,9 +343,20 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A3F6F6262F08017B007A426E /* TextStyle.swift in Sources */,
+				A3F6F6242F08017B007A426E /* JournalViewModel.swift in Sources */,
+				A3F6F6202F08017B007A426E /* AppConfig.swift in Sources */,
+				A3F6F6252F08017B007A426E /* ChatMessage.swift in Sources */,
+				A3F6F6222F08017B007A426E /* ChatbotViewModel.swift in Sources */,
 				A3DFFA182F07F2D8002287C4 /* JournalMap.xcdatamodeld in Sources */,
+				A3F6F61B2F08017B007A426E /* CategoryAutocompleteView.swift in Sources */,
 				A3DFFA152F07F2D8002287C4 /* Persistence.swift in Sources */,
+				A3F6F61D2F08017B007A426E /* CollectionsPage.swift in Sources */,
+				A3F6F6212F08017B007A426E /* OpenAIService.swift in Sources */,
+				A3F6F6232F08017B007A426E /* CollectionsViewModel.swift in Sources */,
 				A3DFFA0E2F07F2D7002287C4 /* ContentView.swift in Sources */,
+				A3F6F61F2F08017B007A426E /* JournalEntriesPage.swift in Sources */,
+				A3F6F61C2F08017B007A426E /* ChatbotPage.swift in Sources */,
 				A3DFFA0C2F07F2D7002287C4 /* JournalMapApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -427,6 +518,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = JournalMap/JournalMap.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"JournalMap/Preview Content\"";
@@ -455,6 +547,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = JournalMap/JournalMap.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"JournalMap/Preview Content\"";

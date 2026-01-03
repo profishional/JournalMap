@@ -27,6 +27,44 @@ struct CollectionsPage: View {
         NavigationView {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
+                    // Category Sections - Show first
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Categories")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .padding(.horizontal)
+
+                        if viewModel.categorySections.isEmpty {
+                            Text("No categories yet. Add categories to your journal entries to see them here.")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                                .padding(.horizontal)
+                        } else {
+                            LazyVGrid(columns: [GridItem(.adaptive(minimum: 150))], spacing: 12) {
+                                ForEach(viewModel.categorySections) { section in
+                                    Button(action: {
+                                        selectedFilter = .category(section.name)
+                                        filteredEntries = viewModel.filterEntries(by: section.name)
+                                    }) {
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text(section.name)
+                                                .font(.headline)
+                                                .foregroundColor(.primary)
+                                            Text("\(section.entryCount) entries")
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                        }
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .padding()
+                                        .background(Color(.systemGray6))
+                                        .cornerRadius(12)
+                                    }
+                                }
+                            }
+                            .padding(.horizontal)
+                        }
+                    }
+
                     // Date Sections
                     VStack(alignment: .leading, spacing: 16) {
                         Text("By Date")
@@ -34,7 +72,13 @@ struct CollectionsPage: View {
                             .fontWeight(.bold)
                             .padding(.horizontal)
 
-                        ForEach(viewModel.dateSections) { section in
+                        if viewModel.dateSections.isEmpty {
+                            Text("No entries yet. Start journaling to see entries organized by date.")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                                .padding(.horizontal)
+                        } else {
+                            ForEach(viewModel.dateSections) { section in
                             VStack(alignment: .leading, spacing: 8) {
                                 Text("\(section.year)")
                                     .font(.headline)
@@ -71,48 +115,18 @@ struct CollectionsPage: View {
                                     .padding(.horizontal)
                                 }
                             }
-                        }
-                    }
-
-                    // Category Sections
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text("By Category")
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .padding(.horizontal)
-
-                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 150))], spacing: 12) {
-                            ForEach(viewModel.categorySections) { section in
-                                Button(action: {
-                                    selectedFilter = .category(section.name)
-                                    filteredEntries = viewModel.filterEntries(by: section.name)
-                                }) {
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text(section.name)
-                                            .font(.headline)
-                                            .foregroundColor(.primary)
-                                        Text("\(section.entryCount) entries")
-                                            .font(.caption)
-                                            .foregroundColor(.secondary)
-                                    }
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .padding()
-                                    .background(Color(.systemGray6))
-                                    .cornerRadius(12)
-                                }
                             }
                         }
-                        .padding(.horizontal)
                     }
                 }
                 .padding(.vertical)
             }
             .navigationTitle("Collections")
             .sheet(item: Binding(
-                get: { selectedFilter != nil ? FilterWrapper(selectedFilter!) : nil },
+                get: { selectedFilter != nil ? FilterWrapper(filter: selectedFilter!) : nil },
                 set: { if $0 == nil { selectedFilter = nil } }
             )) { filterWrapper in
-                FilteredEntriesView(entries: filteredEntries, filterType: filterWrapper.filter)
+                FilteredEntriesView(entries: filteredEntries, filter: filterWrapper.filter)
             }
         }
         .onAppear {
@@ -135,7 +149,7 @@ struct FilterWrapper: Identifiable {
 
 struct FilteredEntriesView: View {
     let entries: [JournalEntry]
-    let filterType: CollectionsPage.FilterType
+    let filter: CollectionsPage.FilterType
 
     var body: some View {
         NavigationView {
@@ -167,7 +181,7 @@ struct FilteredEntriesView: View {
     }
 
     private var filterTitle: String {
-        switch filterType {
+        switch filter {
         case .date(let year, let month):
             if let month = month {
                 let formatter = DateFormatter()

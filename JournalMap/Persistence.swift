@@ -40,13 +40,15 @@ struct PersistenceController {
         if inMemory {
             container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")
         } else {
-            // Enable CloudKit sync
+            // Enable CloudKit sync (optional - will work without iCloud if not configured)
             let storeDescription = container.persistentStoreDescriptions.first
             storeDescription?.setOption(true as NSNumber, forKey: NSPersistentHistoryTrackingKey)
             storeDescription?.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
             // CloudKit container identifier should match your app's bundle identifier
-            // Update this to match your actual bundle identifier (e.g., "iCloud.com.yourcompany.JournalMap")
+            // Only enable CloudKit if we have the proper bundle identifier
             if let identifier = Bundle.main.bundleIdentifier {
+                // Check if CloudKit is available (requires proper entitlements)
+                // For now, we'll try to enable it, but it will gracefully fail if entitlements aren't set up
                 storeDescription?.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(containerIdentifier: "iCloud.\(identifier)")
             }
         }

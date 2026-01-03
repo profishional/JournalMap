@@ -15,6 +15,7 @@ class JournalViewModel: ObservableObject {
     @Published var entries: [ParsedEntry] = []
 
     private let viewContext: NSManagedObjectContext
+    private var existingTimestamps: [String: Date] = [:]
 
     init(viewContext: NSManagedObjectContext) {
         self.viewContext = viewContext
@@ -31,10 +32,25 @@ class JournalViewModel: ObservableObject {
             rawText = ""
         }
 
+        // Load existing entries from Core Data to preserve timestamps
+        loadExistingEntries()
         parseEntries()
     }
 
-    func saveDocument() {
+    private func loadExistingEntries() {
+        existingTimestamps = [:]
+        let request: NSFetchRequest<JournalEntry> = JournalEntry.fetchRequest()
+        if let coreDataEntries = try? viewContext.fetch(request) {
+            for coreDataEntry in coreDataEntries {
+                if let title = coreDataEntry.title {
+                    // Store timestamp by title for lookup during parsing
+                    existingTimestamps[title] = coreDataEntry.timestamp ?? Date()
+                }
+            }
+        }
+    }
+
+    func saveDocument(reparseEntries: Bool = true) {
         let request: NSFetchRequest<JournalDocument> = JournalDocument.fetchRequest()
         request.fetchLimit = 1
 
@@ -45,8 +61,13 @@ class JournalViewModel: ObservableObject {
         document.rawText = rawText
         document.lastModified = Date()
 
-        parseEntries()
+        if reparseEntries {
+            parseEntries()
+        }
         saveToCoreData()
+
+        // Refresh timestamp cache after saving
+        loadExistingEntries()
 
         do {
             try viewContext.save()
@@ -60,71 +81,100 @@ class JournalViewModel: ObservableObject {
         let lines = rawText.components(separatedBy: .newlines)
         var currentEntry: ParsedEntry?
         var currentBody: [String] = []
-        var inCategoryLine = false
+        var hasSeenCategoryLine = false
+        var previousLineWasEmpty = true
 
-        for (index, line) in lines.enumerated() {
-            let trimmed = line.trimmingCharacters(in: .whitespaces)
+        for (_, line) in lines.enumerated() {
+            let trimmed = line.trimmingCharacters(in: CharacterSet.whitespaces)
 
-            // Check if this is a title (starts with non-hashtag, non-empty, and previous entry ended)
-            if !trimmed.isEmpty && !trimmed.hasPrefix("#") {
-                // Save previous entry if exists
-                if let entry = currentEntry {
-                    entry.body = currentBody.joined(separator: "\n")
-                    entries.append(entry)
-                }
-
-                // Start new entry
-                currentEntry = ParsedEntry(
-                    title: trimmed,
-                    categories: [],
-                    body: "",
-                    timestamp: Date()
-                )
-                currentBody = []
-                inCategoryLine = false
-            }
             // Check if this is a category line (starts with #)
-            else if trimmed.hasPrefix("#") {
-                inCategoryLine = true
-                let categoryText = String(trimmed.dropFirst()).trimmingCharacters(in: .whitespaces)
+            if trimmed.hasPrefix("#") {
+                hasSeenCategoryLine = true
+                let categoryText = String(trimmed.dropFirst()).trimmingCharacters(in: CharacterSet.whitespaces)
                 if !categoryText.isEmpty {
                     let categories = categoryText.components(separatedBy: ",")
-                        .map { $0.trimmingCharacters(in: .whitespaces) }
+                        .map { $0.trimmingCharacters(in: CharacterSet.whitespaces) }
                         .filter { !$0.isEmpty }
                     currentEntry?.categories.append(contentsOf: categories)
                 }
             }
-            // Body text
-            else if !trimmed.isEmpty || (trimmed.isEmpty && !inCategoryLine && currentEntry != nil) {
-                if currentEntry != nil {
-                    currentBody.append(line)
+            // Check if this is a title (non-empty, doesn't start with #, and either first line or previous line was empty)
+            else if !trimmed.isEmpty && previousLineWasEmpty {
+                // Save previous entry if exists
+                if var entry = currentEntry { // ?.copy() TODO
+                    entry.body = currentBody.joined(separator: "\n")
+                    entries.append(entry)
                 }
-                inCategoryLine = false
+
+                // Start new entry - use existing timestamp from Core Data if available
+                let entryTimestamp = existingTimestamps[trimmed] ?? Date()
+                currentEntry = ParsedEntry(
+                    title: trimmed,
+                    categories: [],
+                    body: "",
+                    timestamp: entryTimestamp
+                )
+                currentBody = []
+                hasSeenCategoryLine = false
+                previousLineWasEmpty = false
+            }
+            // Body text (only if we have a current entry and it's not a category line)
+            else if currentEntry != nil && !trimmed.hasPrefix("#") {
+                if !trimmed.isEmpty {
+                    currentBody.append(line)
+                } else {
+                    // Empty line in body - preserve it
+                    currentBody.append("")
+                }
+                previousLineWasEmpty = trimmed.isEmpty
+            } else {
+                previousLineWasEmpty = trimmed.isEmpty
             }
         }
 
         // Save last entry
-        if let entry = currentEntry {
+        if var entry = currentEntry { // ?.copy() TODO
             entry.body = currentBody.joined(separator: "\n")
             entries.append(entry)
         }
+
+        // Sort by descending timestamp (newest first)
+        entries.sort { $0.timestamp > $1.timestamp }
     }
 
     func saveToCoreData() {
-        // Clear existing entries
         let fetchRequest: NSFetchRequest<JournalEntry> = JournalEntry.fetchRequest()
+
+        // Copy timestamps BEFORE deleting (don't hold references to deleted objects)
+        var existingTimestampsMap: [String: Date] = [:]
+        if let existingEntries = try? viewContext.fetch(fetchRequest) {
+            for existingEntry in existingEntries {
+                if let title = existingEntry.title, let timestamp = existingEntry.timestamp {
+                    existingTimestampsMap[title] = timestamp
+                }
+            }
+        }
+
+        // Delete all existing entries
         if let existingEntries = try? viewContext.fetch(fetchRequest) {
             existingEntries.forEach { viewContext.delete($0) }
         }
 
-        // Save parsed entries
+        // Save parsed entries with preserved timestamps
         for (index, parsedEntry) in entries.enumerated() {
             let entry = JournalEntry(context: viewContext)
             entry.id = UUID()
             entry.title = parsedEntry.title
             entry.categories = parsedEntry.categories.joined(separator: ", ")
             entry.body = parsedEntry.body
-            entry.timestamp = parsedEntry.timestamp
+
+            // Use timestamp from map (copied before deletion), fallback to parsed timestamp
+            if let existingTimestamp = existingTimestampsMap[parsedEntry.title] {
+                entry.timestamp = existingTimestamp
+            } else {
+                entry.timestamp = parsedEntry.timestamp
+            }
+
             entry.lastModified = Date()
             entry.position = Int32(index)
 
@@ -159,7 +209,10 @@ class JournalViewModel: ObservableObject {
 
     func getSimilarCategories(to searchText: String) -> [String] {
         let allCategories = getAllCategories()
+        guard !allCategories.isEmpty else { return [] } // Return empty if no categories exist
+
         let lowerSearch = searchText.lowercased()
+        guard !lowerSearch.isEmpty else { return allCategories.prefix(5).map { $0 } } // Return top 5 if search is empty
 
         return allCategories
             .filter { $0.lowercased().contains(lowerSearch) || lowerSearch.contains($0.lowercased()) }
@@ -184,7 +237,8 @@ class JournalViewModel: ObservableObject {
     }
 }
 
-class ParsedEntry {
+struct ParsedEntry: Identifiable {
+    let id = UUID()
     var title: String
     var categories: [String]
     var body: String

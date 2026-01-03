@@ -74,7 +74,7 @@ struct ChatbotPage: View {
                         }
                         .padding()
                     }
-                    .onChange(of: viewModel.messages.count) { _ in
+                    .onChange(of: viewModel.messages.count) { oldCount, newCount in
                         if let lastMessage = viewModel.messages.last {
                             withAnimation {
                                 proxy.scrollTo(lastMessage.id, anchor: .bottom)
@@ -122,9 +122,8 @@ struct ChatbotPage: View {
                 Text("Enter your OpenAI API key to enable the chatbot feature.")
             }
             .onAppear {
-                if AppConfig.shared.openAIApiKey == nil {
-                    showAPIKeyAlert = true
-                }
+                apiKeyInput = AppConfig.shared.openAIApiKey ?? ""
+                // Don't auto-show alert, let user click key icon if needed
             }
         }
     }
