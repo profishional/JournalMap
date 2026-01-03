@@ -33,21 +33,23 @@ struct JournalEntriesPage: View {
     }
 
     var body: some View {
-        ZStack {
-            // Background to detect taps outside cards
-            Color.clear
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    // Cancel editing when tapping outside cards
-                    if editingEntryId != nil {
-                        editingEntryId = nil
-                        editingField = nil
+        NavigationStack {
+            ZStack {
+                // Background to detect taps outside cards
+                Color(.systemGroupedBackground)
+                    .ignoresSafeArea()
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        // Cancel editing when tapping outside cards
+                        if editingEntryId != nil {
+                            editingEntryId = nil
+                            editingField = nil
+                        }
                     }
-                }
 
-            ScrollView {
-                LazyVStack(spacing: 0) {
-                    ForEach(viewModel.entries) { entry in
+                ScrollView {
+                    LazyVStack(spacing: 0) {
+                        ForEach(viewModel.entries) { entry in
                         if editingEntryId == entry.id {
                             // Inline editable entry
                             EditableEntryCard(
@@ -80,8 +82,8 @@ struct JournalEntriesPage: View {
                             )
                             .overlay(
                                 Rectangle()
-                                    .frame(height: 0.5)
-                                    .foregroundColor(Color(.separator)),
+                                    .frame(height: 1)
+                                    .foregroundColor(Color(.systemGray5)),
                                 alignment: .bottom
                             )
                         } else {
@@ -99,44 +101,77 @@ struct JournalEntriesPage: View {
                             )
                             .overlay(
                                 Rectangle()
-                                    .frame(height: 0.5)
-                                    .foregroundColor(Color(.separator)),
+                                    .frame(height: 1)
+                                    .foregroundColor(Color(.systemGray5)),
                                 alignment: .bottom
                             )
                         }
                     }
                 }
-            }
-
-            // Floating plus button
-            VStack {
-                Spacer()
-                HStack {
-                    Spacer()
-                    Button(action: {
-                        // Create new entry inline at the top
-                        let newEntry = ParsedEntry(
-                            title: "",
-                            categories: [],
-                            body: "",
-                            timestamp: Date()
-                        )
-                        viewModel.entries.insert(newEntry, at: 0)
-                        editingEntryId = newEntry.id
-                        editingField = .title
-                    }) {
-                        Image(systemName: "plus")
-                            .font(.system(size: 24, weight: .semibold))
-                            .foregroundColor(.white)
-                            .frame(width: 56, height: 56)
-                            .background(Color.accentColor)
-                            .clipShape(Circle())
-                            .shadow(color: Color.black.opacity(0.3), radius: 5, x: 0, y: 2)
+                
+                // Empty state
+                if viewModel.entries.isEmpty {
+                    VStack(spacing: 16) {
+                        Spacer()
+                            .frame(height: 100)
+                        
+                        Image(systemName: "book.closed")
+                            .font(.system(size: 56))
+                            .foregroundColor(.secondary.opacity(0.4))
+                        
+                        Text("No entries yet")
+                            .font(.system(size: 20, weight: .semibold, design: .rounded))
+                            .foregroundColor(.secondary)
+                        
+                        Text("Tap + to create your first journal entry")
+                            .font(.system(size: 15))
+                            .foregroundColor(.secondary.opacity(0.7))
+                        
+                        Spacer()
                     }
-                    .padding(.trailing, 20)
-                    .padding(.bottom, 20)
+                    .frame(maxWidth: .infinity)
                 }
             }
+
+                // Floating plus button
+                VStack {
+                    Spacer()
+                    HStack {
+                        Spacer()
+                        Button(action: {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                let newEntry = ParsedEntry(
+                                    title: "",
+                                    categories: [],
+                                    body: "",
+                                    timestamp: Date()
+                                )
+                                viewModel.entries.insert(newEntry, at: 0)
+                                editingEntryId = newEntry.id
+                                editingField = .title
+                            }
+                        }) {
+                            Image(systemName: "plus")
+                                .font(.system(size: 22, weight: .bold))
+                                .foregroundColor(.white)
+                                .frame(width: 60, height: 60)
+                                .background(
+                                    LinearGradient(
+                                        colors: [Color.accentColor, Color.accentColor.opacity(0.8)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                                .clipShape(Circle())
+                                .shadow(color: Color.accentColor.opacity(0.4), radius: 8, x: 0, y: 4)
+                        }
+                        .padding(.trailing, 20)
+                        .padding(.bottom, 30)
+                    }
+                }
+            }
+            .navigationTitle("Journal")
+            .navigationBarTitleDisplayMode(.large)
         }
         .simultaneousGesture(
             MagnificationGesture()
@@ -240,16 +275,18 @@ struct SwipeableEntryCard: View {
         ZStack(alignment: .trailing) {
             // Delete button background - always present but hidden
             Button(action: {
-                withAnimation {
+                withAnimation(.spring(response: 0.3)) {
                     dragOffset = 0
                     onDelete()
                 }
             }) {
-                HStack {
-                    Image(systemName: "trash")
-                        .foregroundColor(.white)
-                        .font(.system(size: 18, weight: .semibold))
+                VStack(spacing: 4) {
+                    Image(systemName: "trash.fill")
+                        .font(.system(size: 20))
+                    Text("Delete")
+                        .font(.system(size: 11, weight: .medium))
                 }
+                .foregroundColor(.white)
                 .frame(width: deleteButtonWidth)
                 .frame(maxHeight: .infinity)
                 .background(Color.red)
@@ -293,10 +330,23 @@ struct EntryCard: View {
     let onDoubleTap: () -> Void
 
     private func formatTimestamp(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .short
-        formatter.timeStyle = .short
-        return formatter.string(from: date)
+        let calendar = Calendar.current
+        
+        if calendar.isDateInToday(date) {
+            let formatter = DateFormatter()
+            formatter.timeStyle = .short
+            return formatter.string(from: date)
+        } else if calendar.isDateInYesterday(date) {
+            return "Yesterday"
+        } else if calendar.isDate(date, equalTo: Date(), toGranularity: .weekOfYear) {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "EEEE"
+            return formatter.string(from: date)
+        } else {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "MMM d"
+            return formatter.string(from: date)
+        }
     }
 
     private func firstFewWords(of text: String, maxWords: Int) -> String {
@@ -309,45 +359,52 @@ struct EntryCard: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 10) {
             // Title and timestamp row
-            HStack(alignment: .top) {
+            HStack(alignment: .firstTextBaseline) {
                 Text(entry.title.isEmpty ? "Untitled" : entry.title)
-                    .font(.system(size: 20, weight: .bold))
+                    .font(.system(size: 18, weight: .semibold, design: .rounded))
                     .foregroundColor(.primary)
                     .lineLimit(zoomLevel == .titlesOnly ? 2 : nil)
 
                 Spacer()
 
                 Text(formatTimestamp(entry.timestamp))
-                    .font(.system(size: 12))
-                    .foregroundColor(.gray)
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(.secondary)
             }
 
-            // Categories (max 3) - second line
+            // Categories as pills
             if !entry.categories.isEmpty && zoomLevel != .titlesOnly {
-                let displayCategories = Array(entry.categories.prefix(3))
-                Text(displayCategories.map { "#\($0)" }.joined(separator: ", "))
-                    .font(.system(size: 14))
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
+                HStack(spacing: 6) {
+                    ForEach(Array(entry.categories.prefix(3)), id: \.self) { category in
+                        Text("#\(category)")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.accentColor)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 5)
+                            .background(Color.accentColor.opacity(0.1))
+                            .clipShape(Capsule())
+                    }
+                }
             }
 
             // Body
-            if zoomLevel == .normal {
+            if zoomLevel == .normal && !entry.body.isEmpty {
                 Text(entry.body)
-                    .font(.system(size: 16))
-                    .foregroundColor(.primary)
-                    .lineLimit(nil)
-            } else if zoomLevel == .titlesWithPreview {
-                // Show first few words of body
-                Text(firstFewWords(of: entry.body, maxWords: 15))
-                    .font(.system(size: 14))
+                    .font(.system(size: 15))
                     .foregroundColor(.secondary)
+                    .lineLimit(4)
+                    .lineSpacing(2)
+            } else if zoomLevel == .titlesWithPreview && !entry.body.isEmpty {
+                Text(firstFewWords(of: entry.body, maxWords: 12))
+                    .font(.system(size: 14))
+                    .foregroundColor(.secondary.opacity(0.7))
                     .lineLimit(1)
             }
         }
-        .padding()
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color(.systemBackground))
         .contentShape(Rectangle())
@@ -374,18 +431,27 @@ struct EditableEntryCard: View {
     @FocusState private var focusedField: JournalEntriesPage.EditingField?
 
     private func formatTimestamp(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .short
-        formatter.timeStyle = .short
-        return formatter.string(from: date)
+        let calendar = Calendar.current
+        
+        if calendar.isDateInToday(date) {
+            let formatter = DateFormatter()
+            formatter.timeStyle = .short
+            return formatter.string(from: date)
+        } else if calendar.isDateInYesterday(date) {
+            return "Yesterday"
+        } else {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "MMM d"
+            return formatter.string(from: date)
+        }
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 10) {
             // Title and timestamp row
-            HStack(alignment: .top) {
+            HStack(alignment: .firstTextBaseline) {
                 TextField("Title", text: $titleText)
-                    .font(.system(size: 20, weight: .bold))
+                    .font(.system(size: 18, weight: .semibold, design: .rounded))
                     .focused($focusedField, equals: .title)
                     .onSubmit {
                         if !titleText.trimmingCharacters(in: CharacterSet.whitespaces).isEmpty {
@@ -397,8 +463,8 @@ struct EditableEntryCard: View {
                 Spacer()
 
                 Text(formatTimestamp(entry.timestamp))
-                    .font(.system(size: 12))
-                    .foregroundColor(.gray)
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(.secondary)
             }
 
             // Categories line
@@ -472,28 +538,30 @@ struct EditableEntryCard: View {
                                     insertCategory(suggestion)
                                 }) {
                                     Text("#\(suggestion)")
-                                        .font(.caption)
-                                        .padding(.horizontal, 8)
-                                        .padding(.vertical, 4)
-                                        .background(Color.accentColor.opacity(0.1))
+                                        .font(.system(size: 13, weight: .medium))
                                         .foregroundColor(.accentColor)
-                                        .cornerRadius(8)
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 6)
+                                        .background(Color.accentColor.opacity(0.12))
+                                        .clipShape(Capsule())
                                 }
+                                .buttonStyle(.plain)
                             }
                         }
-                        .padding(.horizontal, 4)
+                        .padding(.vertical, 4)
                     }
                 }
             }
 
             // Body
             TextEditor(text: $bodyText)
-                .font(.system(size: 16))
-                .frame(minHeight: 100)
+                .font(.system(size: 15))
+                .frame(minHeight: 120)
                 .focused($focusedField, equals: .body)
                 .scrollContentBackground(.hidden)
         }
-        .padding()
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color(.systemBackground))
         .onAppear {
