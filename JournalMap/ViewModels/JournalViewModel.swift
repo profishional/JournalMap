@@ -198,6 +198,7 @@ class JournalViewModel: ObservableObject {
     }
 
     func getAllCategories() -> [String] {
+        // Get from Core Data Category table (persisted categories)
         let request: NSFetchRequest<Category> = Category.fetchRequest()
         request.sortDescriptors = [NSSortDescriptor(keyPath: \Category.usageCount, ascending: false)]
 

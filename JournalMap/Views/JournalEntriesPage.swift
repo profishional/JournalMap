@@ -167,13 +167,6 @@ struct JournalEntriesPage: View {
                     }
                 }
         )
-        .onTapGesture {
-            // Tap outside to cancel editing
-            if editingEntryId != nil {
-                editingEntryId = nil
-                editingField = nil
-            }
-        }
     }
 
     private func saveEntry(_ entry: ParsedEntry) {
@@ -422,11 +415,9 @@ struct EditableEntryCard: View {
                             .count
 
                         // If less than 3 categories, return goes to body
-                        if categoryCount < 3 {
+                        if categoryCount <= 3 {
                             editingField = .body
                             focusedField = .body
-                        } else {
-                            // If 3 categories, return does nothing (stays in category field)
                         }
                     }
                     .onChange(of: categoriesText) { oldValue, newValue in
@@ -459,18 +450,8 @@ struct EditableEntryCard: View {
                         }
                     }
                     .onKeyPress { press in
-                        if press.key == .tab {
-                            // Tab moves to next category or body
-                            let categoryCount = categoriesText.components(separatedBy: ",")
-                                .map { $0.trimmingCharacters(in: CharacterSet.whitespaces) }
-                                .filter { !$0.isEmpty }
-                                .count
-
-                            if categoryCount >= 3 {
-                                editingField = .body
-                                focusedField = .body
-                            } else {
-                                // Add next category
+                            if press.key == .tab {
+                                // Tab always adds next category
                                 if !categoriesText.isEmpty && !categoriesText.hasSuffix(", #") {
                                     if categoriesText.hasSuffix(",") {
                                         categoriesText += " #"
@@ -478,8 +459,7 @@ struct EditableEntryCard: View {
                                         categoriesText += ", #"
                                     }
                                 }
-                            }
-                            return .handled
+                                return .handled
                         }
                         return .ignored
                     }
@@ -518,7 +498,10 @@ struct EditableEntryCard: View {
         .background(Color(.systemBackground))
         .onAppear {
             titleText = entry.title
-            categoriesText = entry.categories.prefix(3).map { "#\($0)" }.joined(separator: ", ")
+            categoriesText = entry.categories.prefix(3).map { cat in
+                let cleaned = cat.hasPrefix("#") ? String(cat.dropFirst()) : cat
+                return "#\(cleaned)"
+            }.joined(separator: ", ")
             bodyText = entry.body
             focusedField = editingField
         }
